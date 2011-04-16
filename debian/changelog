@@ -1,0 +1,5 @@
+msgpack-python (0.1.9-1) unstable; urgency=low
+
+  * Initial release; closes: #622921.
+
+ -- Robert S. Edmonds <edmonds@debian.org>  Sat, 16 Apr 2011 14:24:09 -0400

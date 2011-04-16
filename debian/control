@@ -1,0 +1,20 @@
+Source: msgpack-python
+Section: python
+Priority: optional
+Maintainer: Robert S. Edmonds <edmonds@debian.org>
+Build-Depends: debhelper (>= 7.2.11~), cython, python-all-dev (>= 2.6.6-3~)
+Standards-Version: 3.9.1
+Homepage: http://pypi.python.org/pypi/msgpack-python/
+X-Python-Version: 2.6
+
+Package: msgpack-python
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
+XB-Python-Version: ${python:Versions}
+Description: Python implementation of MessagePack format
+ MessagePack is a binary-based efficient object serialization format.
+ It enables the exchange of structured objects between many languages
+ like JSON.  But unlike JSON, it is very fast and small.
+ .
+ This package contains a Python extension module implementing the
+ MessagePack format.
