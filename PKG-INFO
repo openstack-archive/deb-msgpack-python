@@ -1,0 +1,22 @@
+Metadata-Version: 1.0
+Name: msgpack-python
+Version: 0.1.9
+Summary: MessagePack (de)serializer.
+Home-page: http://msgpack.org/
+Author: INADA Naoki
+Author-email: songofacandy@gmail.com
+License: UNKNOWN
+Download-URL: http://pypi.python.org/pypi/msgpack/
+Description: MessagePack (de)serializer for Python.
+        
+        What's MessagePack? (from http://msgpack.org/)
+        
+         MessagePack is a binary-based efficient data interchange format that is
+         focused on high performance. It is like JSON, but very fast and small.
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
