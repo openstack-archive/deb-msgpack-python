@@ -5,7 +5,6 @@ Maintainer: Robert S. Edmonds <edmonds@debian.org>
 Build-Depends: debhelper (>= 7.2.11~), cython, python-all-dev (>= 2.6.6-3~)
 Standards-Version: 3.9.1
 Homepage: http://pypi.python.org/pypi/msgpack-python/
-X-Python-Version: 2.6
 
 Package: msgpack-python
 Architecture: any
