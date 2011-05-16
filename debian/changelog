@@ -1,8 +1,9 @@
-msgpack-python (0.1.9-2) UNRELEASED; urgency=low
+msgpack-python (0.1.9-2) unstable; urgency=low
 
-  * wharrgarbl
+  * Clean msgpack/_msgpack.c; closes: #626949.
+  * Remove X-Python-Version from debian/control; closes: #626950.
 
- -- Robert S. Edmonds <edmonds@debian.org>  Mon, 16 May 2011 13:36:44 -0400
+ -- Robert S. Edmonds <edmonds@debian.org>  Mon, 16 May 2011 13:47:02 -0400
 
 msgpack-python (0.1.9-1) unstable; urgency=low
 
