@@ -1,3 +1,9 @@
+msgpack-python (0.1.10-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Robert S. Edmonds <edmonds@debian.org>  Sun, 06 Nov 2011 15:16:20 -0500
+
 msgpack-python (0.1.9-2) unstable; urgency=low
 
   * Clean msgpack/_msgpack.c; closes: #626949.
