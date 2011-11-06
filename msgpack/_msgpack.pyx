@@ -9,6 +9,9 @@ cdef extern from "Python.h":
 
 from libc.stdlib cimport *
 from libc.string cimport *
+import gc
+_gc_disable = gc.disable
+_gc_enable = gc.enable
 
 cdef extern from "pack.h":
     struct msgpack_packer:
@@ -33,7 +36,7 @@ cdef int DEFAULT_RECURSE_LIMIT=511
 
 cdef class Packer(object):
     """MessagePack Packer
-    
+
     usage:
 
         packer = Packer()
@@ -42,6 +45,10 @@ cdef class Packer(object):
     """
     cdef msgpack_packer pk
     cdef object _default
+    cdef object _bencoding
+    cdef object _berrors
+    cdef char *encoding
+    cdef char *unicode_errors
 
     def __cinit__(self):
         cdef int buf_size = 1024*1024
@@ -51,11 +58,25 @@ cdef class Packer(object):
         self.pk.buf_size = buf_size
         self.pk.length = 0
 
-    def __init__(self, default=None):
+    def __init__(self, default=None, encoding='utf-8', unicode_errors='strict'):
         if default is not None:
             if not PyCallable_Check(default):
                 raise TypeError("default must be a callable.")
         self._default = default
+        if encoding is None:
+            self.encoding = NULL
+            self.unicode_errors = NULL
+        else:
+            if isinstance(encoding, unicode):
+                self._bencoding = encoding.encode('ascii')
+            else:
+                self._bencoding = encoding
+            self.encoding = PyBytes_AsString(self._bencoding)
+            if isinstance(unicode_errors, unicode):
+                self._berrors = unicode_errors.encode('ascii')
+            else:
+                self._berrors = unicode_errors
+            self.unicode_errors = PyBytes_AsString(self._berrors)
 
     def __dealloc__(self):
         free(self.pk.buf);
@@ -65,7 +86,7 @@ cdef class Packer(object):
         cdef unsigned long long ullval
         cdef long longval
         cdef double fval
-        cdef char* rawval 
+        cdef char* rawval
         cdef int ret
         cdef dict d
 
@@ -98,7 +119,9 @@ cdef class Packer(object):
             if ret == 0:
                 ret = msgpack_pack_raw_body(&self.pk, rawval, len(o))
         elif PyUnicode_Check(o):
-            o = PyUnicode_AsUTF8String(o)
+            if not self.encoding:
+                raise TypeError("Can't encode utf-8 no encoding is specified")
+            o = PyUnicode_AsEncodedString(o, self.encoding, self.unicode_errors)
             rawval = o
             ret = msgpack_pack_raw(&self.pk, len(o))
             if ret == 0:
@@ -118,9 +141,9 @@ cdef class Packer(object):
                 for v in o:
                     ret = self._pack(v, nest_limit-1)
                     if ret != 0: break
-        elif self._default is not None:
+        elif self._default:
             o = self._default(o)
-            ret = self._pack(o, nest_limit)
+            ret = self._pack(o, nest_limit-1)
         else:
             raise TypeError("can't serialize %r" % (o,))
         return ret
@@ -135,14 +158,14 @@ cdef class Packer(object):
         return buf
 
 
-def pack(object o, object stream, default=None):
+def pack(object o, object stream, default=None, encoding='utf-8', unicode_errors='strict'):
     """pack an object `o` and write it to stream)."""
-    packer = Packer(default=default)
+    packer = Packer(default=default, encoding=encoding, unicode_errors=unicode_errors)
     stream.write(packer.pack(o))
 
-def packb(object o, default=None):
+def packb(object o, default=None, encoding='utf-8', unicode_errors='strict'):
     """pack o and return packed bytes."""
-    packer = Packer(default=default)
+    packer = Packer(default=default, encoding=encoding, unicode_errors=unicode_errors)
     return packer.pack(o)
 
 dumps = packs = packb
@@ -152,6 +175,8 @@ cdef extern from "unpack.h":
         int use_list
         PyObject* object_hook
         PyObject* list_hook
+        char *encoding
+        char *unicode_errors
 
     ctypedef struct template_context:
         msgpack_user user
@@ -161,12 +186,12 @@ cdef extern from "unpack.h":
         PyObject* key
 
     int template_execute(template_context* ctx, const_char_ptr data,
-                         size_t len, size_t* off)
+                         size_t len, size_t* off) except -1
     void template_init(template_context* ctx)
     object template_data(template_context* ctx)
 
 
-def unpackb(object packed, object object_hook=None, object list_hook=None, bint use_list=0):
+def unpackb(object packed, object object_hook=None, object list_hook=None, bint use_list=0, encoding=None, unicode_errors="strict"):
     """Unpack packed_bytes to object. Returns an unpacked object."""
     cdef template_context ctx
     cdef size_t off = 0
@@ -176,9 +201,26 @@ def unpackb(object packed, object object_hook=None, object list_hook=None, bint 
     cdef Py_ssize_t buf_len
     PyObject_AsReadBuffer(packed, <const_void_ptr*>&buf, &buf_len)
 
+    if encoding is None:
+        enc = NULL
+        err = NULL
+    else:
+        if isinstance(encoding, unicode):
+            bencoding = encoding.encode('ascii')
+        else:
+            bencoding = encoding
+        if isinstance(unicode_errors, unicode):
+            berrors = unicode_errors.encode('ascii')
+        else:
+            berrors = unicode_errors
+        enc = PyBytes_AsString(bencoding)
+        err = PyBytes_AsString(berrors)
+
     template_init(&ctx)
     ctx.user.use_list = use_list
     ctx.user.object_hook = ctx.user.list_hook = NULL
+    ctx.user.encoding = enc
+    ctx.user.unicode_errors = err
     if object_hook is not None:
         if not PyCallable_Check(object_hook):
             raise TypeError("object_hook must be a callable.")
@@ -187,7 +229,11 @@ def unpackb(object packed, object object_hook=None, object list_hook=None, bint 
         if not PyCallable_Check(list_hook):
             raise TypeError("list_hook must be a callable.")
         ctx.user.list_hook = <PyObject*>list_hook
-    ret = template_execute(&ctx, buf, buf_len, &off)
+    _gc_disable()
+    try:
+        ret = template_execute(&ctx, buf, buf_len, &off)
+    finally:
+        _gc_enable()
     if ret == 1:
         return template_data(&ctx)
     else:
@@ -195,22 +241,10 @@ def unpackb(object packed, object object_hook=None, object list_hook=None, bint 
 
 loads = unpacks = unpackb
 
-def unpack(object stream, object object_hook=None, object list_hook=None, bint use_list=0):
+def unpack(object stream, object object_hook=None, object list_hook=None, bint use_list=0, encoding=None, unicode_errors="strict"):
     """unpack an object from stream."""
     return unpackb(stream.read(), use_list=use_list,
-                   object_hook=object_hook, list_hook=list_hook)
-
-cdef class UnpackIterator(object):
-    cdef object unpacker
-
-    def __init__(self, unpacker):
-        self.unpacker = unpacker
-
-    def __next__(self):
-        return self.unpacker.unpack()
-
-    def __iter__(self):
-        return self
+                   object_hook=object_hook, list_hook=list_hook, encoding=encoding, unicode_errors=unicode_errors)
 
 cdef class Unpacker(object):
     """Unpacker(read_size=1024*1024)
@@ -234,6 +268,10 @@ cdef class Unpacker(object):
     cdef Py_ssize_t read_size
     cdef bint use_list
     cdef object object_hook
+    cdef object _bencoding
+    cdef object _berrors
+    cdef char *encoding
+    cdef char *unicode_errors
 
     def __cinit__(self):
         self.buf = NULL
@@ -243,7 +281,8 @@ cdef class Unpacker(object):
         self.buf = NULL;
 
     def __init__(self, file_like=None, Py_ssize_t read_size=0, bint use_list=0,
-                 object object_hook=None, object list_hook=None):
+                 object object_hook=None, object list_hook=None,
+                 encoding=None, unicode_errors='strict'):
         if read_size == 0:
             read_size = 1024*1024
         self.use_list = use_list
@@ -270,6 +309,20 @@ cdef class Unpacker(object):
             if not PyCallable_Check(list_hook):
                 raise TypeError("list_hook must be a callable.")
             self.ctx.user.list_hook = <PyObject*>list_hook
+        if encoding is None:
+            self.ctx.user.encoding = NULL
+            self.ctx.user.unicode_errors = NULL
+        else:
+            if isinstance(encoding, unicode):
+                self._bencoding = encoding.encode('ascii')
+            else:
+                self._bencoding = encoding
+            self.ctx.user.encoding = PyBytes_AsString(self._bencoding)
+            if isinstance(unicode_errors, unicode):
+                self._berrors = unicode_errors.encode('ascii')
+            else:
+                self._berrors = unicode_errors
+            self.ctx.user.unicode_errors = PyBytes_AsString(self._berrors)
 
     def feed(self, object next_bytes):
         cdef char* buf
@@ -299,7 +352,7 @@ cdef class Unpacker(object):
                 new_size = tail + _buf_len
                 if new_size < buf_size*2:
                     new_size = buf_size*2
-                buf = <char*>realloc(buf, new_size) 
+                buf = <char*>realloc(buf, new_size)
                 if buf == NULL:
                     # self.buf still holds old buffer and will be freed during
                     # obj destruction
@@ -326,7 +379,9 @@ cdef class Unpacker(object):
         """unpack one object"""
         cdef int ret
         while 1:
+            _gc_disable()
             ret = template_execute(&self.ctx, self.buf, self.buf_tail, &self.buf_head)
+            _gc_enable()
             if ret == 1:
                 o = template_data(&self.ctx)
                 template_init(&self.ctx)
@@ -340,7 +395,10 @@ cdef class Unpacker(object):
                 raise ValueError("Unpack failed: error = %d" % (ret,))
 
     def __iter__(self):
-        return UnpackIterator(self)
+        return self
+
+    def __next__(self):
+        return self.unpack()
 
     # for debug.
     #def _buf(self):
