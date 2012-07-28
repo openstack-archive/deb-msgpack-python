@@ -3,7 +3,7 @@ Section: python
 Priority: optional
 Maintainer: Robert S. Edmonds <edmonds@debian.org>
 Build-Depends: debhelper (>= 7.2.11~), cython (>= 0.15~), python-all-dev (>= 2.6.6-3~), python-support
-Standards-Version: 3.9.2
+Standards-Version: 3.9.3
 Homepage: http://pypi.python.org/pypi/msgpack-python/
 
 Package: msgpack-python
