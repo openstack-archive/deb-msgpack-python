@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
-version = (0, 1, 10)
+version = (0, 2, 0)
 
 import os
 import sys
 from glob import glob
-from distutils.core import setup, Extension
 from distutils.command.sdist import sdist
+from setuptools import setup, Extension
 
 try:
     from Cython.Distutils import build_ext
@@ -37,7 +37,7 @@ if have_cython:
                                         cython_compiler.default_options)
             sdist.__init__(self, *args, **kwargs)
 else:
-    sources = ['msgpack/_msgpack.c']
+    sources = ['msgpack/_msgpack.cpp']
 
     for f in sources:
         if not os.path.exists(f):
@@ -45,23 +45,24 @@ else:
 
     Sdist = sdist
 
-libraries = ['ws2_32'] if sys.platform == 'win32' else []
+libraries = []
+if sys.platform == 'win32':
+    libraries.append('ws2_32')
 
 msgpack_mod = Extension('msgpack._msgpack',
                         sources=sources,
                         libraries=libraries,
+                        include_dirs=['.'],
+                        language='c++',
                         )
 del sources, libraries
 
 
 desc = 'MessagePack (de)serializer.'
-long_desc = """MessagePack (de)serializer for Python.
-
-What's MessagePack? (from http://msgpack.org/)
-
- MessagePack is a binary-based efficient data interchange format that is
- focused on high performance. It is like JSON, but very fast and small.
-"""
+f = open('README.rst')
+long_desc = f.read()
+f.close()
+del f
 
 setup(name='msgpack-python',
       author='INADA Naoki',
