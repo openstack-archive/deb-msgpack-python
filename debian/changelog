@@ -1,3 +1,11 @@
+msgpack-python (0.2.0-1) unstable; urgency=low
+
+  * New upstream release.
+    - Fixes big-endian bug in msgpack/pack_template.h; closes: #633449.
+  * Add versioned build-dep on cython >= 0.15~; closes: #683083.
+
+ -- Robert S. Edmonds <edmonds@debian.org>  Sat, 28 Jul 2012 17:20:15 -0400
+
 msgpack-python (0.1.10-1) unstable; urgency=low
 
   * New upstream release.
