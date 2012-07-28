@@ -2,14 +2,13 @@ Source: msgpack-python
 Section: python
 Priority: optional
 Maintainer: Robert S. Edmonds <edmonds@debian.org>
-Build-Depends: debhelper (>= 7.2.11~), cython (>= 0.15~), python-all-dev (>= 2.6.6-3~), python-support
+Build-Depends: debhelper (>= 9~), cython (>= 0.15~), python-all-dev (>= 2.6.6-3~)
 Standards-Version: 3.9.3
 Homepage: http://pypi.python.org/pypi/msgpack-python/
 
 Package: msgpack-python
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
-XB-Python-Version: ${python:Versions}
 Description: Python implementation of MessagePack format
  MessagePack is a binary-based efficient object serialization format.
  It enables the exchange of structured objects between many languages
