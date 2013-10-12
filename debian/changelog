@@ -1,3 +1,14 @@
+msgpack-python (0.3.0-1) unstable; urgency=low
+
+  * New upstream release; closes: #719524.
+
+  [ Piotr Ożarowski ]
+  * Rename msgpack-python binary package to python-msgpack (following Debian
+    Python Policy).
+  * Add python3-msgpack binary package; closes: #719525.
+
+ -- Robert S. Edmonds <edmonds@debian.org>  Sat, 12 Oct 2013 13:00:58 -0400
+
 msgpack-python (0.2.0-1) unstable; urgency=low
 
   * New upstream release.
