@@ -4,13 +4,19 @@ Priority: optional
 Maintainer: Robert S. Edmonds <edmonds@debian.org>
 Build-Depends:
  debhelper (>= 9~),
+ dh-python,
  cython (>= 0.15~),
  python-all-dev (>= 2.6.6-3~),
- python-setuptools
+ python3-all-dev,
+ python-setuptools,
+ python3-setuptools
 Standards-Version: 3.9.3
 Homepage: http://pypi.python.org/pypi/msgpack-python/
 
-Package: msgpack-python
+Package: python-msgpack
+Replaces: msgpack-python (<< 0.3.0-1)
+Conflicts: msgpack-python (<< 0.3.0-1)
+Provides: msgpack-python
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
 Description: Python implementation of MessagePack format
@@ -19,4 +25,15 @@ Description: Python implementation of MessagePack format
  like JSON.  But unlike JSON, it is very fast and small.
  .
  This package contains a Python extension module implementing the
+ MessagePack format.
+
+Package: python3-msgpack
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python3:Depends}
+Description: Python 3 implementation of MessagePack format
+ MessagePack is a binary-based efficient object serialization format.
+ It enables the exchange of structured objects between many languages
+ like JSON. But unlike JSON, it is very fast and small.
+ .
+ This package contains a Python 3 extension module implementing the
  MessagePack format.
