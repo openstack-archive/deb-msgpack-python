@@ -1,26 +1,60 @@
 #!/usr/bin/env python
 # coding: utf-8
-version = (0, 2, 0)
-
 import os
 import sys
 from glob import glob
 from distutils.command.sdist import sdist
 from setuptools import setup, Extension
 
+from distutils.command.build_ext import build_ext
+
+class NoCython(Exception):
+    pass
+
 try:
-    from Cython.Distutils import build_ext
     import Cython.Compiler.Main as cython_compiler
     have_cython = True
 except ImportError:
-    from distutils.command.build_ext import build_ext
     have_cython = False
 
-# make msgpack/__verison__.py
-f = open('msgpack/__version__.py', 'w')
-f.write("version = %r\n" % (version,))
-f.close()
-del f
+
+def cythonize(src):
+    sys.stderr.write("cythonize: %r\n" % (src,))
+    cython_compiler.compile([src], cplus=True, emit_linenums=True)
+
+def ensure_source(src):
+    pyx = os.path.splitext(src)[0] + '.pyx'
+
+    if not os.path.exists(src):
+        if not have_cython:
+            raise NoCython
+        cythonize(pyx)
+    elif (os.path.exists(pyx) and
+          os.stat(src).st_mtime < os.stat(pyx).st_mtime and
+          have_cython):
+        cythonize(pyx)
+    return src
+
+
+class BuildExt(build_ext):
+    def build_extension(self, ext):
+        try:
+            ext.sources = list(map(ensure_source, ext.sources))
+        except NoCython:
+            print("WARNING")
+            print("Cython is required for building extension from checkout.")
+            print("Install Cython >= 0.16 or install msgpack from PyPI.")
+            print("Falling back to pure Python implementation.")
+            return
+        try:
+            return build_ext.build_extension(self, ext)
+        except Exception as e:
+            print("WARNING: Failed to compile extensiom modules.")
+            print("msgpack uses fallback pure python implementation.")
+            print(e)
+
+
+exec(open('msgpack/_version.py').read())
 
 version_str = '.'.join(str(x) for x in version[:3])
 if len(version) > 3 and version[3] != 'final':
@@ -28,34 +62,38 @@ if len(version) > 3 and version[3] != 'final':
 
 # take care of extension modules.
 if have_cython:
-    sources = ['msgpack/_msgpack.pyx']
-
     class Sdist(sdist):
         def __init__(self, *args, **kwargs):
             for src in glob('msgpack/*.pyx'):
-                cython_compiler.compile(glob('msgpack/*.pyx'),
-                                        cython_compiler.default_options)
+                cythonize(src)
             sdist.__init__(self, *args, **kwargs)
 else:
-    sources = ['msgpack/_msgpack.cpp']
-
-    for f in sources:
-        if not os.path.exists(f):
-            raise ImportError("Building msgpack from VCS needs Cython. Install Cython or use sdist package.")
-
     Sdist = sdist
 
 libraries = []
 if sys.platform == 'win32':
     libraries.append('ws2_32')
 
-msgpack_mod = Extension('msgpack._msgpack',
-                        sources=sources,
-                        libraries=libraries,
-                        include_dirs=['.'],
-                        language='c++',
-                        )
-del sources, libraries
+if sys.byteorder == 'big':
+    macros = [('__BIG_ENDIAN__', '1')]
+else:
+    macros = [('__LITTLE_ENDIAN__', '1')]
+
+ext_modules = []
+if not hasattr(sys, 'pypy_version_info'):
+    ext_modules.append(Extension('msgpack._packer',
+                                 sources=['msgpack/_packer.cpp'],
+                                 libraries=libraries,
+                                 include_dirs=['.'],
+                                 define_macros=macros,
+                                 ))
+    ext_modules.append(Extension('msgpack._unpacker',
+                                 sources=['msgpack/_unpacker.cpp'],
+                                 libraries=libraries,
+                                 include_dirs=['.'],
+                                 define_macros=macros,
+                                 ))
+del libraries, macros
 
 
 desc = 'MessagePack (de)serializer.'
@@ -68,8 +106,8 @@ setup(name='msgpack-python',
       author='INADA Naoki',
       author_email='songofacandy@gmail.com',
       version=version_str,
-      cmdclass={'build_ext': build_ext, 'sdist': Sdist},
-      ext_modules=[msgpack_mod],
+      cmdclass={'build_ext': BuildExt, 'sdist': Sdist},
+      ext_modules=ext_modules,
       packages=['msgpack'],
       description=desc,
       long_description=long_desc,
@@ -78,7 +116,6 @@ setup(name='msgpack-python',
       classifiers=[
           'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 3',
-          'Development Status :: 4 - Beta',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: Apache Software License',
           ]
