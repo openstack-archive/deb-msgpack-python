@@ -2,17 +2,16 @@
 # coding: utf-8
 
 import six
-from nose import main
-from nose.tools import *
-from nose.plugins.skip import SkipTest
+import struct
+from pytest import raises, xfail
 
-from msgpack import packs, unpacks, Unpacker, Packer
+from msgpack import packb, unpackb, Unpacker, Packer
 
 from io import BytesIO
 
-def check(data):
-    re = unpacks(packs(data))
-    assert_equal(re, data)
+def check(data, use_list=False):
+    re = unpackb(packb(data), use_list=use_list)
+    assert re == data
 
 def testPack():
     test_data = [
@@ -30,29 +29,29 @@ def testPack():
 
 def testPackUnicode():
     test_data = [
-        six.u(""), six.u("abcd"), (six.u("defgh"),), six.u("Русский текст"),
+        six.u(""), six.u("abcd"), [six.u("defgh")], six.u("Русский текст"),
         ]
     for td in test_data:
-        re = unpacks(packs(td, encoding='utf-8'), encoding='utf-8')
-        assert_equal(re, td)
+        re = unpackb(packb(td, encoding='utf-8'), use_list=1, encoding='utf-8')
+        assert re == td
         packer = Packer(encoding='utf-8')
         data = packer.pack(td)
-        re = Unpacker(BytesIO(data), encoding='utf-8').unpack()
-        assert_equal(re, td)
+        re = Unpacker(BytesIO(data), encoding='utf-8', use_list=1).unpack()
+        assert re == td
 
 def testPackUTF32():
     try:
         test_data = [
             six.u(""),
             six.u("abcd"),
-            (six.u("defgh"),),
+            [six.u("defgh")],
             six.u("Русский текст"),
             ]
         for td in test_data:
-            re = unpacks(packs(td, encoding='utf-32'), encoding='utf-32')
-            assert_equal(re, td)
-    except LookupError:
-        raise SkipTest
+            re = unpackb(packb(td, encoding='utf-32'), use_list=1, encoding='utf-32')
+            assert re == td
+    except LookupError as e:
+        xfail(e)
 
 def testPackBytes():
     test_data = [
@@ -62,29 +61,103 @@ def testPackBytes():
         check(td)
 
 def testIgnoreUnicodeErrors():
-    re = unpacks(packs(b'abc\xeddef'),
-        encoding='utf-8', unicode_errors='ignore')
-    assert_equal(re, "abcdef")
+    re = unpackb(packb(b'abc\xeddef'), encoding='utf-8', unicode_errors='ignore', use_list=1)
+    assert re == "abcdef"
 
-@raises(UnicodeDecodeError)
 def testStrictUnicodeUnpack():
-    unpacks(packs(b'abc\xeddef'), encoding='utf-8')
+    with raises(UnicodeDecodeError):
+        unpackb(packb(b'abc\xeddef'), encoding='utf-8', use_list=1)
 
-@raises(UnicodeEncodeError)
 def testStrictUnicodePack():
-    packs(six.u("abc\xeddef"), encoding='ascii', unicode_errors='strict')
+    with raises(UnicodeEncodeError):
+        packb(six.u("abc\xeddef"), encoding='ascii', unicode_errors='strict')
 
 def testIgnoreErrorsPack():
-    re = unpacks(packs(six.u("abcФФФdef"), encoding='ascii', unicode_errors='ignore'), encoding='utf-8')
-    assert_equal(re, six.u("abcdef"))
+    re = unpackb(packb(six.u("abcФФФdef"), encoding='ascii', unicode_errors='ignore'), encoding='utf-8', use_list=1)
+    assert re == six.u("abcdef")
 
-@raises(TypeError)
 def testNoEncoding():
-    packs(six.u("abc"), encoding=None)
+    with raises(TypeError):
+        packb(six.u("abc"), encoding=None)
 
 def testDecodeBinary():
-    re = unpacks(packs("abc"), encoding=None)
-    assert_equal(re, b"abc")
+    re = unpackb(packb("abc"), encoding=None, use_list=1)
+    assert re == b"abc"
 
-if __name__ == '__main__':
-    main()
+def testPackFloat():
+    assert packb(1.0, use_single_float=True)  == b'\xca' + struct.pack('>f', 1.0)
+    assert packb(1.0, use_single_float=False) == b'\xcb' + struct.pack('>d', 1.0)
+
+def testArraySize(sizes=[0, 5, 50, 1000]):
+    bio = six.BytesIO()
+    packer = Packer()
+    for size in sizes:
+        bio.write(packer.pack_array_header(size))
+        for i in range(size):
+            bio.write(packer.pack(i))
+
+    bio.seek(0)
+    unpacker = Unpacker(bio, use_list=1)
+    for size in sizes:
+        assert unpacker.unpack() == list(range(size))
+
+def test_manualreset(sizes=[0, 5, 50, 1000]):
+    packer = Packer(autoreset=False)
+    for size in sizes:
+        packer.pack_array_header(size)
+        for i in range(size):
+            packer.pack(i)
+
+    bio = six.BytesIO(packer.bytes())
+    unpacker = Unpacker(bio, use_list=1)
+    for size in sizes:
+        assert unpacker.unpack() == list(range(size))
+
+    packer.reset()
+    assert packer.bytes() == b''
+
+def testMapSize(sizes=[0, 5, 50, 1000]):
+    bio = six.BytesIO()
+    packer = Packer()
+    for size in sizes:
+        bio.write(packer.pack_map_header(size))
+        for i in range(size):
+            bio.write(packer.pack(i)) # key
+            bio.write(packer.pack(i * 2)) # value
+
+    bio.seek(0)
+    unpacker = Unpacker(bio)
+    for size in sizes:
+        assert unpacker.unpack() == dict((i, i * 2) for i in range(size))
+
+
+class odict(dict):
+    '''Reimplement OrderedDict to run test on Python 2.6'''
+    def __init__(self, seq):
+        self._seq = seq
+        dict.__init__(self, seq)
+
+    def items(self):
+        return self._seq[:]
+
+    def iteritems(self):
+        return iter(self._seq)
+
+    def keys(self):
+        return [x[0] for x in self._seq]
+
+def test_odict():
+    seq = [(b'one', 1), (b'two', 2), (b'three', 3), (b'four', 4)]
+    od = odict(seq)
+    assert unpackb(packb(od), use_list=1) == dict(seq)
+    def pair_hook(seq):
+        return list(seq)
+    assert unpackb(packb(od), object_pairs_hook=pair_hook, use_list=1) == seq
+
+
+def test_pairlist():
+    pairlist = [(b'a', 1), (2, b'b'), (b'foo', b'bar')]
+    packer = Packer()
+    packed = packer.pack_map_pairs(pairlist)
+    unpacked = unpackb(packed, object_pairs_hook=list)
+    assert pairlist == unpacked
