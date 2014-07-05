@@ -8,6 +8,7 @@ msgpack-python (0.4.2-1) unstable; urgency=medium
   * Fixed VCS URLs to use the PKG OpenStack repository.
   * Ran wrap-and-sort.
   * Overrides dh commands that don't need to run.
+  * Fixed Format: field of debian/copyright.
 
  -- Thomas Goirand <zigo@debian.org>  Sat, 05 Jul 2014 14:51:14 +0800
 
