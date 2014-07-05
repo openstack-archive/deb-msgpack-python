@@ -1,3 +1,10 @@
+msgpack-python (0.3.0-2) unstable; urgency=medium
+
+  * Sets the PKG OpenStack team as new Maintainer:, and set myself and Robert
+    as uploaders (after Robert agreed in bug report 752747#10).
+
+ -- Thomas Goirand <zigo@debian.org>  Sat, 05 Jul 2014 14:51:14 +0800
+
 msgpack-python (0.3.0-1) unstable; urgency=low
 
   * New upstream release; closes: #719524.

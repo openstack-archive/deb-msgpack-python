@@ -1,7 +1,8 @@
 Source: msgpack-python
 Section: python
 Priority: optional
-Maintainer: Robert S. Edmonds <edmonds@debian.org>
+Maintainer: PKG OpenStack <openstack-devel@lists.alioth.debian.org>
+Uploaders: Robert S. Edmonds <edmonds@debian.org>, Thomas Goirand <zigo@debian.org>
 Build-Depends:
  debhelper (>= 9~),
  dh-python,
