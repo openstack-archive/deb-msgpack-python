@@ -2,8 +2,23 @@
 #export DH_VERBOSE=1
 export PYBUILD_NAME=msgpack
 
+PYTHONS:=$(shell pyversions -vr)
+PYTHON3S:=$(shell py3versions -vr)
+
 %:
 	dh $@ --with python2,python3 --buildsystem=pybuild
+
+override_dh_auto_test:
+ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
+	set -e ; for pyvers in $(PYTHONS) ; do \
+		echo "===> Testing with Python$$pyvers" ; \
+		PYTHON=python$$pyvers nosetests ; \
+	done
+	set -e ; for pyvers in $(PYTHON3S) ; do \
+		echo "===> Testing with Python$$pyvers" ; \
+		PYTHON=python$$pyvers nosetests3 ; \
+	done
+endif
 
 # Commands not to run
 override_dh_installcatalogs override_dh_installemacsen override_dh_installifupdown:

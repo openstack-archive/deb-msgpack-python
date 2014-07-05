@@ -11,6 +11,7 @@ msgpack-python (0.4.2-1) unstable; urgency=medium
   * Fixed Format: field of debian/copyright.
   * Standards-Version: is now 3.9.5.
   * Replaced Conflicts: with Breaks:, as per lintian suggestion.
+  * Now running the unit tests using nose.
 
  -- Thomas Goirand <zigo@debian.org>  Sat, 05 Jul 2014 14:51:14 +0800
 
