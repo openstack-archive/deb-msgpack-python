@@ -2,15 +2,15 @@ Source: msgpack-python
 Section: python
 Priority: optional
 Maintainer: PKG OpenStack <openstack-devel@lists.alioth.debian.org>
-Uploaders: Robert S. Edmonds <edmonds@debian.org>, Thomas Goirand <zigo@debian.org>
-Build-Depends:
- debhelper (>= 9~),
- dh-python,
- cython (>= 0.15~),
- python-all-dev (>= 2.6.6-3~),
- python3-all-dev,
- python-setuptools,
- python3-setuptools
+Uploaders: Robert S. Edmonds <edmonds@debian.org>,
+           Thomas Goirand <zigo@debian.org>
+Build-Depends: cython (>= 0.15~),
+               debhelper (>= 9~),
+               dh-python,
+               python-all-dev (>= 2.6.6-3~),
+               python-setuptools,
+               python3-all-dev,
+               python3-setuptools
 Standards-Version: 3.9.4
 Homepage: http://pypi.python.org/pypi/msgpack-python/
 Vcs-Git: git://anonscm.debian.org/openstack/msgpack-python.git
@@ -21,7 +21,7 @@ Replaces: msgpack-python (<< 0.3.0-1)
 Conflicts: msgpack-python (<< 0.3.0-1)
 Provides: msgpack-python
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
+Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}
 Description: Python implementation of MessagePack format
  MessagePack is a binary-based efficient object serialization format.
  It enables the exchange of structured objects between many languages
@@ -32,7 +32,7 @@ Description: Python implementation of MessagePack format
 
 Package: python3-msgpack
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python3:Depends}
+Depends: ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends}
 Description: Python 3 implementation of MessagePack format
  MessagePack is a binary-based efficient object serialization format.
  It enables the exchange of structured objects between many languages

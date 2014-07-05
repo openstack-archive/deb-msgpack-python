@@ -5,6 +5,7 @@ msgpack-python (0.3.0-2) unstable; urgency=medium
   * Renamed debian and master branches as debian-unstable and upstream-unstable
     which is much more meaningful. Edited debian/gbp.conf accordingly.
   * Fixed VCS URLs to use the PKG OpenStack repository.
+  * Ran wrap-and-sort.
 
  -- Thomas Goirand <zigo@debian.org>  Sat, 05 Jul 2014 14:51:14 +0800
 
