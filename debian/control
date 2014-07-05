@@ -18,7 +18,7 @@ Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/msgpack-python.git
 
 Package: python-msgpack
 Replaces: msgpack-python (<< 0.3.0-1)
-Conflicts: msgpack-python (<< 0.3.0-1)
+Breaks: msgpack-python (<< 0.3.0-1)
 Provides: msgpack-python
 Architecture: any
 Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}
