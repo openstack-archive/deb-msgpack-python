@@ -9,9 +9,11 @@ Build-Depends: cython (>= 0.15~),
                dh-python,
                python-all-dev (>= 2.6.6-3~),
                python-nose,
+               python-pytest,
                python-setuptools,
                python3-all-dev,
                python3-nose,
+               python3-pytest,
                python3-setuptools
 Standards-Version: 3.9.5
 Homepage: http://pypi.python.org/pypi/msgpack-python/
