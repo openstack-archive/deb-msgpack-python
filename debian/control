@@ -8,21 +8,19 @@ Build-Depends: cython (>= 0.15~),
                debhelper (>= 9~),
                dh-python,
                python-all-dev,
-               python-nose,
-               python-pytest,
                python-setuptools,
                python3-all-dev,
+               python3-setuptools
+Build-Depends-Indep:                python-nose,
+               python-pytest,
                python3-nose,
                python3-pytest,
-               python3-setuptools
 Standards-Version: 3.9.6
 Homepage: http://pypi.python.org/pypi/msgpack-python/
 Vcs-Git: git://anonscm.debian.org/openstack/msgpack-python.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/msgpack-python.git
 
 Package: python-msgpack
-Replaces: msgpack-python (<< 0.3.0-1)
-Breaks: msgpack-python (<< 0.3.0-1)
 Provides: msgpack-python
 Architecture: any
 Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}

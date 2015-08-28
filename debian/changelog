@@ -4,6 +4,8 @@ msgpack-python (0.4.6-1) unstable; urgency=medium
   * Standards-Version is now 3.9.6 (no change).
   * Watch file using the PyPi redirector.
   * Removed version for python-all-dev build-depends.
+  * Removed Replaces:+Breaks msgpack-python (<< 0.3.0-1) now useless as Jessie
+    was released.
 
  -- Thomas Goirand <zigo@debian.org>  Fri, 28 Aug 2015 16:10:08 +0000
 
