@@ -15,7 +15,7 @@ Build-Depends: cython (>= 0.15~),
                python3-nose,
                python3-pytest,
                python3-setuptools
-Standards-Version: 3.9.5
+Standards-Version: 3.9.6
 Homepage: http://pypi.python.org/pypi/msgpack-python/
 Vcs-Git: git://anonscm.debian.org/openstack/msgpack-python.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/msgpack-python.git
