@@ -1,6 +1,7 @@
 msgpack-python (0.4.6-2) UNRELEASED; urgency=medium
 
   * Fixed homepage (https).
+  * Fixed VCS URLs (https).
 
  -- Ondřej Nový <novy@ondrej.org>  Sun, 28 Feb 2016 15:27:59 +0100
 
