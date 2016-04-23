@@ -3,6 +3,7 @@ msgpack-python (0.4.7-1) UNRELEASED; urgency=medium
   * New upstream release.
   * Fixed homepage (https).
   * Fixed VCS URLs (https).
+  * Added simple Debian tests.
 
  -- Ondřej Nový <novy@ondrej.org>  Sun, 28 Feb 2016 15:27:59 +0100
 

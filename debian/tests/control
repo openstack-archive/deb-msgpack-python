@@ -1,0 +1,5 @@
+Depends: python-msgpack
+Test-Command: cd "$ADTTMP" ; python -c "import msgpack; print msgpack.version"
+
+Depends: python3-msgpack
+Test-Command: cd "$ADTTMP" ; python3 -c "import msgpack; print(msgpack.version)"
