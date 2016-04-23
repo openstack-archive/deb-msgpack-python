@@ -10,6 +10,7 @@ msgpack-python (0.4.7-1) unstable; urgency=medium
     - Added myself for Debian part.
     - Fixed for new upstream release.
   * Removed d/source/options (single-debian-patch)
+  * Added README.rst to python3-msgpack
 
  -- Ondřej Nový <novy@ondrej.org>  Sat, 23 Apr 2016 23:22:11 +0200
 
