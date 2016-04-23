@@ -135,13 +135,21 @@ cdef class Packer(object):
                     ret = msgpack_pack_false(&self.pk)
             elif PyLong_Check(o):
                 # PyInt_Check(long) is True for Python 3.
-                # Sow we should test long before int.
-                if o > 0:
-                    ullval = o
-                    ret = msgpack_pack_unsigned_long_long(&self.pk, ullval)
-                else:
-                    llval = o
-                    ret = msgpack_pack_long_long(&self.pk, llval)
+                # So we should test long before int.
+                try:
+                    if o > 0:
+                        ullval = o
+                        ret = msgpack_pack_unsigned_long_long(&self.pk, ullval)
+                    else:
+                        llval = o
+                        ret = msgpack_pack_long_long(&self.pk, llval)
+                except OverflowError as oe:
+                    if not default_used and self._default is not None:
+                        o = self._default(o)
+                        default_used = True
+                        continue
+                    else:
+                        raise
             elif PyInt_Check(o):
                 longval = o
                 ret = msgpack_pack_long(&self.pk, longval)
@@ -166,11 +174,11 @@ cdef class Packer(object):
                 o = PyUnicode_AsEncodedString(o, self.encoding, self.unicode_errors)
                 L = len(o)
                 if L > (2**32)-1:
-                    raise ValueError("dict is too large")
+                    raise ValueError("unicode string is too large")
                 rawval = o
-                ret = msgpack_pack_raw(&self.pk, len(o))
+                ret = msgpack_pack_raw(&self.pk, L)
                 if ret == 0:
-                    ret = msgpack_pack_raw_body(&self.pk, rawval, len(o))
+                    ret = msgpack_pack_raw_body(&self.pk, rawval, L)
             elif PyDict_CheckExact(o):
                 d = <dict>o
                 L = len(d)
