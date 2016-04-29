@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: msgpack-python
-Source: http://pypi.python.org/packages/source/m/msgpack-python/
+Source: https://pypi.python.org/pypi/msgpack-python
 
 Files: *
 Copyright: (C) 2008-2011 INADA Naoki <songofacandy@gmail.com>
