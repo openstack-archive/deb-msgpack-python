@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: msgpack-python
-Version: 0.4.7
+Version: 0.4.8
 Summary: MessagePack (de)serializer.
 Home-page: http://msgpack.org/
 Author: INADA Naoki
