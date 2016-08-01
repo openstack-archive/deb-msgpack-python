@@ -2,6 +2,8 @@ msgpack-python (0.4.8-1) UNRELEASED; urgency=medium
 
   * New upstream release
   * d/copyright: Fixed upstream URL
+  * Now running the unit tests using pytest, removed nose B-D.
+  * d/rules: Cleanup
 
  -- Ondřej Nový <novy@ondrej.org>  Fri, 29 Apr 2016 23:19:04 +0200
 
