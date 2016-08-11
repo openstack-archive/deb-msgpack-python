@@ -1,0 +1,14 @@
+MANIFEST
+build/*
+dist/*
+.tox
+*.pyc
+*.pyo
+*.so
+*~
+msgpack/__version__.py
+msgpack/*.cpp
+*.egg-info
+/venv
+/tags
+/docs/_build
