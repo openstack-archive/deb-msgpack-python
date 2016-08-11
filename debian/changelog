@@ -1,6 +1,8 @@
 msgpack-python (0.4.8-2) UNRELEASED; urgency=medium
 
   * Added openstack-pkg-tools as build-depends.
+  * d/source/options: extend-diff-ignore = "^[^/]*[.]egg-info/".
+  * Switched to git tag based packaging.
 
  -- Thomas Goirand <zigo@debian.org>  Thu, 11 Aug 2016 13:32:00 +0200
 
