@@ -2,5 +2,8 @@
 #export DH_VERBOSE=1
 export PYBUILD_NAME=msgpack
 
+UPSTREAM_GIT := https://github.com/msgpack/msgpack-python
+include /usr/share/openstack-pkg-tools/pkgos.make
+
 %:
 	dh $@ --with python2,python3 --buildsystem=pybuild
