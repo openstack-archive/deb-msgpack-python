@@ -16,8 +16,8 @@ Build-Depends: cython (>= 0.15~),
                python3-setuptools,
 Standards-Version: 3.9.8
 Homepage: https://pypi.python.org/pypi/msgpack-python/
-Vcs-Git: https://anonscm.debian.org/git/openstack/msgpack-python.git
-Vcs-Browser: https://anonscm.debian.org/cgit/openstack/msgpack-python.git/
+Vcs-Git: https://git.openstack.org/openstack/deb-msgpack-python -b debian/newton
+Vcs-Browser: https://git.openstack.org/cgit/openstack/deb-msgpack-python?h=debian%2Fnewton
 
 Package: python-msgpack
 Provides: msgpack-python,
