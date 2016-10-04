@@ -1,4 +1,4 @@
-msgpack-python (0.4.8-2) UNRELEASED; urgency=medium
+msgpack-python (0.4.8-2) unstable; urgency=medium
 
   [ Thomas Goirand ]
   * Added openstack-pkg-tools as build-depends.
